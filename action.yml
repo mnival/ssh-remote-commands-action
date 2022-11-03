@@ -1,0 +1,30 @@
+name: "SSH Remote Commands"
+description: "SSH Remote Commands"
+
+branding:
+  icon: 'terminal'
+  color: 'gray-dark'
+
+inputs:
+  ssh_host_alias:
+    description: "SSH Host Alias"
+    required: true
+  ssh_command:
+    description: "SSH User"
+    required: true
+  ssh_stop_on_error:
+    description: "Stop script after first failure"
+    default: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: SSH Remote Commands
+      shell: bash
+      run: |
+        ssh ${{ inputs.ssh_host_alias }} <<'EOF'
+          if ${{ inputs.ssh_stop_on_error }}; then
+            set -e -o pipefail
+          fi
+          ${{ inputs.ssh_script }}
+        EOF
