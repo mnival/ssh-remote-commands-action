@@ -9,8 +9,8 @@ inputs:
   ssh_host_alias:
     description: "SSH Host Alias"
     required: true
-  ssh_command:
-    description: "SSH User"
+  ssh_commands:
+    description: "SSH Commands"
     required: true
   ssh_stop_on_error:
     description: "Stop script after first failure"
@@ -26,5 +26,5 @@ runs:
           if ${{ inputs.ssh_stop_on_error }}; then
             set -e -o pipefail
           fi
-          ${{ inputs.ssh_script }}
+          ${{ inputs.ssh_commands }}
         EOF
