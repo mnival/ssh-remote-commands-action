@@ -31,7 +31,7 @@ inputs:
 outputs:
   ssh_host_alias:
     description: "Name of the host that must be used to connect to this server"
-    value: ${{ steps.ssh.outputs.ssh_host_alias }}
+    value: ${{ steps.ssh.outputs.host_alias }}
 
 runs:
   using: "composite"
@@ -60,7 +60,7 @@ runs:
     - name: SSH Remote Commands
       shell: bash
       run: |
-        ssh ${{ steps.ssh.output.host_alias }} <<'EOF'
+        ssh ${{ steps.ssh.outputs.host_alias }} <<'EOF'
           if ${{ inputs.ssh_stop_on_error }}; then
             set -e -o pipefail
           fi
