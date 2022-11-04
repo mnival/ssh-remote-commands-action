@@ -11,6 +11,8 @@ inputs:
   ssh_commands:
     description: "SSH Commands"
     required: true
+  ssh_args:
+    description: "SSH arguments"
   ssh_stop_on_error:
     description: "Stop script after first failure"
     default: true
@@ -60,7 +62,7 @@ runs:
     - name: SSH Remote Commands
       shell: bash
       run: |
-        ssh ${{ steps.ssh.outputs.host_alias }} <<'EOF'
+        ssh ${{ inputs.ssh_args }} ${{ steps.ssh.outputs.host_alias }} <<'EOF'
           if ${{ inputs.ssh_stop_on_error }}; then
             set -e -o pipefail
           fi

@@ -48,4 +48,5 @@ jobs:
         uses: mnival/ssh-remote-commands-action@main
         with:
           ssh_host_alias: ${{ steps.ssh.outputs.ssh_host_alias }}
-          ssh_commands: echo "Test Remot Command"
+          ssh_commands: echo "Test Remote Command"
+          ssh_args: -T
