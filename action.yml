@@ -8,21 +8,58 @@ branding:
 inputs:
   ssh_host_alias:
     description: "SSH Host Alias"
-    required: true
   ssh_commands:
     description: "SSH Commands"
     required: true
   ssh_stop_on_error:
     description: "Stop script after first failure"
     default: true
+  ssh_host:
+    description: "SSH Host"
+    required: true
+  ssh_user:
+    description: "SSH User"
+    required: true
+  ssh_port:
+    description: "SSH Port"
+    required: true
+    default: 22
+  ssh_key:
+    description: "SSH Key"
+    required: true
+
+outputs:
+  ssh_host_alias:
+    description: "Name of the host that must be used to connect to this server"
+    value: ${{ steps.ssh.outputs.ssh_host_alias }}
 
 runs:
   using: "composite"
   steps:
+    - name: Generate SSH Config
+      if: ${{ inputs.ssh_host != null && inputs.ssh_user != null && inputs.ssh_key != null }}
+      id: ssh_config
+      uses: mnival/ssh-config-action@v0.0.2
+      with:
+        ssh_host: ${{ inputs.ssh_host }}
+        ssh_user: ${{ inputs.ssh_user }}
+        ssh_key: ${{ inputs.ssh_key }}
+        ssh_port: ${{ inputs.ssh_port }}
+
+    - name: Define ssh_host_alias
+      id: ssh
+      run: |
+        if [[ "x${{ inputs.ssh_host }}" == "x" ]] && [[ "x${{ inputs.ssh_user }}" == "x" ]] && [[ "x${{ inputs.ssh_key }}" == "x" ]]; then
+          echo "host_alias=${{ steps.ssh_config.outputs.ssh_host_alias }}" >> ${GITHUB_OUTPUT}
+          echo "ssh_host_alias=${{ steps.ssh_config.outputs.ssh_host_alias }}" >> ${GITHUB_OUTPUT}
+        else
+          echo "host_alias=${{ inputs.ssh_host_alias }}" >> ${GITHUB_OUTPUT}
+        fi
+
     - name: SSH Remote Commands
       shell: bash
       run: |
-        ssh ${{ inputs.ssh_host_alias }} <<'EOF'
+        ssh ${{ steps.ssh.output.host_alias }} <<'EOF'
           if ${{ inputs.ssh_stop_on_error }}; then
             set -e -o pipefail
           fi
