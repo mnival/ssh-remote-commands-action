@@ -47,6 +47,7 @@ runs:
         ssh_port: ${{ inputs.ssh_port }}
 
     - name: Define ssh_host_alias
+      shell: bash
       id: ssh
       run: |
         if [[ "x${{ inputs.ssh_host }}" == "x" ]] && [[ "x${{ inputs.ssh_user }}" == "x" ]] && [[ "x${{ inputs.ssh_key }}" == "x" ]]; then
