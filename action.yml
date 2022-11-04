@@ -50,14 +50,12 @@ runs:
       shell: bash
       id: ssh
       run: |
-        if [[ "x${{ inputs.ssh_host }}" == "x" ]] && [[ "x${{ inputs.ssh_user }}" == "x" ]] && [[ "x${{ inputs.ssh_key }}" == "x" ]]; then
+        if [[ "x${{ inputs.ssh_host }}" != "x" ]] && [[ "x${{ inputs.ssh_user }}" != "x" ]] && [[ "x${{ inputs.ssh_key }}" != "x" ]]; then
           echo "host_alias=${{ steps.ssh_config.outputs.ssh_host_alias }}" >> ${GITHUB_OUTPUT}
           echo "ssh_host_alias=${{ steps.ssh_config.outputs.ssh_host_alias }}" >> ${GITHUB_OUTPUT}
         else
           echo "host_alias=${{ inputs.ssh_host_alias }}" >> ${GITHUB_OUTPUT}
         fi
-        ls -l ${GITHUB_OUTPUT}
-        cat ${GITHUB_OUTPUT}
 
     - name: SSH Remote Commands
       shell: bash
