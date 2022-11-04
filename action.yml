@@ -56,6 +56,8 @@ runs:
         else
           echo "host_alias=${{ inputs.ssh_host_alias }}" >> ${GITHUB_OUTPUT}
         fi
+        ls -l ${GITHUB_OUTPUT}
+        cat ${GITHUB_OUTPUT}
 
     - name: SSH Remote Commands
       shell: bash
