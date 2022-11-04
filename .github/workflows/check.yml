@@ -1,0 +1,51 @@
+name: Check action
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '!README.md'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-action-directly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Test Remote command directly
+        id: ssh
+        uses: mnival/ssh-remote-commands-action@main
+        with:
+          ssh_host: ${{ secrets.SSH_HOST }}
+          ssh_user: ${{ secrets.SSH_USER }}
+          ssh_key: ${{ secrets.SSH_KEY }}
+          ssh_commands: echo "Test Remote command directly"
+
+      - name: Test after init
+        uses: mnival/ssh-remote-commands-action@main
+        with: 
+          ssh_host_alias: ${{ steps.ssh.outputs.ssh_host_alias }}
+          ssh_commands: echo "Test after init"
+
+  check-action-after-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: SSH Config
+        id: ssh
+        uses: mnival/ssh-config-action@v0.0.2
+        with:
+          ssh_host: ${{ secrets.SSH_HOST }}
+          ssh_user: ${{ secrets.SSH_USER }}
+          ssh_key: ${{ secrets.SSH_KEY }}
+
+      - name: Test Remote Command
+        uses: mnival/ssh-remote-commands-action@main
+        with:
+          ssh_host_alias: ${{ steps.ssh.outputs.ssh_host_alias }}
+          ssh_commands: echo "Test Remot Command"
