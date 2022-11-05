@@ -75,10 +75,10 @@ jobs:
         id: ssh
         uses: mnival/ssh-remote-commands-action@main
         with:
-          ssh_host: ${{ needs.secrets.outputs.ssh_host }}
-          ssh_user: ${{ needs.secrets.outputs.ssh_user }}
-          ssh_key: ${{ needs.secrets.outputs.ssh_key }}
-          ssh_port: ${{ needs.secrets.outputs.ssh_port }}
+          ssh_host: ${{ steps.secrets.outputs.ssh_host }}
+          ssh_user: ${{ steps.secrets.outputs.ssh_user }}
+          ssh_key: ${{ steps.secrets.outputs.ssh_key }}
+          ssh_port: ${{ steps.secrets.outputs.ssh_port }}
           ssh_commands: echo "Test Remote command directly"
 
       - name: Test after init
