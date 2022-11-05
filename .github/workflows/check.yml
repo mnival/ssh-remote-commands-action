@@ -13,6 +13,9 @@ on:
 jobs:
   vault:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     outputs:
       ssh_user: ${{ steps.vault.outputs.ssh_user }}
       ssh_host: ${{ steps.vault.outputs.ssh_host }}
