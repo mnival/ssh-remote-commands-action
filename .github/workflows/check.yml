@@ -42,10 +42,10 @@ jobs:
       - name: Register Secret
         id: secrets
         run: |
-          echo "ssh_user=\"$(echo "${{ steps.vault.outputs.ssh_user }}" | gpg --symmetric --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output - | base64 -w0)\"" >> ${GITHUB_OUTPUT}
-          echo "ssh_host=\"$(echo "${{ steps.vault.outputs.ssh_host }}" | gpg --symmetric --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output - | base64 -w0)\"" >> ${GITHUB_OUTPUT}
-          echo "ssh_port=\"$(echo "${{ steps.vault.outputs.ssh_port }}" | gpg --symmetric --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output - | base64 -w0)\"" >> ${GITHUB_OUTPUT}
-          echo "ssh_key=\"$(echo "${{ steps.vault.outputs.ssh_key }}" | gpg --symmetric --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output - | base64 -w0)\"" >> ${GITHUB_OUTPUT}
+          echo "ssh_user=$(echo "${{ steps.vault.outputs.ssh_user }}" | gpg --symmetric --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output - | base64 -w0)" >> ${GITHUB_OUTPUT}
+          echo "ssh_host=$(echo "${{ steps.vault.outputs.ssh_host }}" | gpg --symmetric --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output - | base64 -w0)" >> ${GITHUB_OUTPUT}
+          echo "ssh_port=$(echo "${{ steps.vault.outputs.ssh_port }}" | gpg --symmetric --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output - | base64 -w0)" >> ${GITHUB_OUTPUT}
+          echo "ssh_key=$(echo "${{ steps.vault.outputs.ssh_key }}" | gpg --symmetric --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output - | base64 -w0)" >> ${GITHUB_OUTPUT}
 
   check-action-directly:
     runs-on: ubuntu-latest
@@ -61,13 +61,13 @@ jobs:
           echo "ssh_user=${ssh_user}" >> ${GITHUB_OUTPUT}
           ssh_host="$(echo "${{ needs.vault.outputs.ssh_host }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output -)"
           echo "::add-mask::${ssh_host}"
-          echo "ssh_user=${ssh_host}" >> ${GITHUB_OUTPUT}
+          echo "ssh_host=${ssh_host}" >> ${GITHUB_OUTPUT}
           ssh_port="$(echo "${{ needs.vault.outputs.ssh_port }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output -)"
           echo "::add-mask::${ssh_port}"
-          echo "ssh_user=${ssh_port}" >> ${GITHUB_OUTPUT}
+          echo "ssh_port=${ssh_port}" >> ${GITHUB_OUTPUT}
           ssh_key="$(echo "${{ needs.vault.outputs.ssh_key }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output -)"
           echo "::add-mask::${ssh_key}"
-          echo "ssh_user=${ssh_key}" >> ${GITHUB_OUTPUT}
+          echo "ssh_key=${ssh_key}" >> ${GITHUB_OUTPUT}
 
       - name: Test Remote command directly
         id: ssh
