@@ -48,7 +48,7 @@ jobs:
         uses: mnival/ssh-remote-commands-action@main
         with:
           ssh_host: ${{ jobs.vault.outputs.ssh_host }}
-          ssh_user: ${{ jobss.vault.outputs.ssh_user }}
+          ssh_user: ${{ jobs.vault.outputs.ssh_user }}
           ssh_key: ${{ jobs.vault.outputs.ssh_key }}
           ssh_port: ${{ jobs.vault.outputs.ssh_port }}
           ssh_commands: echo "Test Remote command directly"
@@ -70,7 +70,7 @@ jobs:
         uses: mnival/ssh-config-action@v0.0.2
         with:
           ssh_host: ${{ jobs.vault.outputs.ssh_host }}
-          ssh_user: ${{ jobss.vault.outputs.ssh_user }}
+          ssh_user: ${{ jobs.vault.outputs.ssh_user }}
           ssh_key: ${{ jobs.vault.outputs.ssh_key }}
           ssh_port: ${{ jobs.vault.outputs.ssh_port }}
 
