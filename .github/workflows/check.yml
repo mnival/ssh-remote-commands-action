@@ -66,7 +66,9 @@ jobs:
           echo "::add-mask::${ssh_port}"
           echo "ssh_port=${ssh_port}" >> ${GITHUB_OUTPUT}
           ssh_key="$(echo "${{ needs.vault.outputs.ssh_key }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output -)"
-          echo "::add-mask::$(echo ${ssh_key})"
+          while read i; do printf "::add-mask::${i}\n"; done <<< $(echo "${ssh_key}")
+          echo "${ssh_key}"
+          echo 'EOF'
           echo 'ssh_key<<EOF' >> ${GITHUB_OUTPUT}
           echo "${ssh_key}" >> ${GITHUB_OUTPUT}
           echo 'EOF' >> ${GITHUB_OUTPUT}
