@@ -45,7 +45,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh secret set PGP_PASSPHRASE --body "${{ steps.vault.outputs.pgp_passphrase }}"
+          gh secret set PGP_PASSPHRASE --body "${{ steps.vault.outputs.pgp_passphrase }}" --repo ${GITHUB_REPOSITORY}
           echo "ssh_user=\"$(echo "${{ steps.vault.outputs.ssh_user }}" | gpg --symmetric --batch --passphrase "${{ steps.vault.outputs.pgp_passphrase }}" --output - | base64 -w0)\"" >> ${GITHUB_OUTPUT}
           echo "ssh_host=\"$(echo "${{ steps.vault.outputs.ssh_host }}" | gpg --symmetric --batch --passphrase "${{ steps.vault.outputs.pgp_passphrase }}" --output - | base64 -w0)\"" >> ${GITHUB_OUTPUT}
           echo "ssh_port=\"$(echo "${{ steps.vault.outputs.ssh_port }}" | gpg --symmetric --batch --passphrase "${{ steps.vault.outputs.pgp_passphrase }}" --output - | base64 -w0)\"" >> ${GITHUB_OUTPUT}
