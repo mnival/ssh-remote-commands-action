@@ -48,6 +48,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - uses: ./.github/actions/vault
+        id: vault
+        with:
+          url: ${{ secrets.VAULT_URL }}
+
       - name: SSH Config
         id: ssh
         uses: mnival/ssh-config-action@v0.0.2
