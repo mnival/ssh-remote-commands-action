@@ -19,7 +19,7 @@ jobs:
       - uses: ./.github/actions/vault
         id: vault
         with:
-          url: ${{ secrets.URL_VAULT }}
+          url: ${{ secrets.VAULT_URL }}
 
       - name: Test Remote command directly
         id: ssh
