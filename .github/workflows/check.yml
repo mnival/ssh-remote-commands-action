@@ -17,9 +17,11 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - uses: ./.github/actions/vault
+      - name: Get Secrets
+        uses: ./.github/actions/vault
         id: vault
         with:
           url: ${{ secrets.VAULT_URL }}
@@ -54,9 +56,11 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - uses: ./.github/actions/vault
+      - name: Get Secrets
+        uses: ./.github/actions/vault
         id: vault
         with:
           url: ${{ secrets.VAULT_URL }}
