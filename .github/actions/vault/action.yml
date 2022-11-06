@@ -1,0 +1,39 @@
+name: "Get Vault Information"
+description: "Get Vault Information"
+
+inputs:
+  url:
+    description: "Url vault"
+    required: true
+
+outputs:
+  ssh_user:
+    value: ${{ steps.vault.outputs.ssh_user }}
+  ssh_host:
+    value: ${{ steps.vault.outputs.ssh_host }}
+  ssh_port:
+    value: ${{ steps.vault.outputs.ssh_port }}
+  ssh_key:
+    value: ${{ steps.vault.outputs.ssh_key }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Repository Name
+      shell: bash
+      id: repository
+      run: echo "name=${GITHUB_REPOSITORY#*/}" >> ${GITHUB_OUTPUT}
+
+    - name: Get secrets in vault
+      uses: hashicorp/vault-action@v2
+      id: vault
+      with:
+        url: ${{ inputs.url }}
+        role: ${{ steps.repository.outputs.name }}
+        method: jwt
+        exportToken: true
+        secrets: |
+          secrets/data/GitHub/ssh-workflow user | ssh_user ;
+          secrets/data/GitHub/ssh-workflow host | ssh_host ;
+          secrets/data/GitHub/ssh-workflow port | ssh_port ;
+          secrets/data/GitHub/ssh-workflow key | ssh_key ;

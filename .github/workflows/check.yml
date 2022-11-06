@@ -13,16 +13,27 @@ on:
 jobs:
   check-action-directly:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get Secrets
+        uses: ./.github/actions/vault
+        id: vault
+        with:
+          url: ${{ secrets.VAULT_URL }}
 
       - name: Test Remote command directly
         id: ssh
         uses: mnival/ssh-remote-commands-action@main
         with:
-          ssh_host: ${{ secrets.SSH_HOST }}
-          ssh_user: ${{ secrets.SSH_USER }}
-          ssh_key: ${{ secrets.SSH_KEY }}
+          ssh_host: ${{ steps.vault.outputs.ssh_host }}
+          ssh_user: ${{ steps.vault.outputs.ssh_user }}
+          ssh_key: ${{ steps.vault.outputs.ssh_key }}
+          ssh_port: ${{ steps.vault.outputs.ssh_port }}
           ssh_commands: echo "Test Remote command directly"
 
       - name: Test after init
@@ -31,18 +42,37 @@ jobs:
           ssh_host_alias: ${{ steps.ssh.outputs.ssh_host_alias }}
           ssh_commands: echo "Test after init"
 
+      - name: Revoke token
+        # This step always runs at the end regardless of the previous steps result
+        if: always()
+        uses: ./.github/actions/revoke-token
+        with:
+          url: ${{ secrets.VAULT_URL }}
+          vault_token: ${{ env.VAULT_TOKEN }}
+
   check-action-after-config:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get Secrets
+        uses: ./.github/actions/vault
+        id: vault
+        with:
+          url: ${{ secrets.VAULT_URL }}
 
       - name: SSH Config
         id: ssh
         uses: mnival/ssh-config-action@v0.0.2
         with:
-          ssh_host: ${{ secrets.SSH_HOST }}
-          ssh_user: ${{ secrets.SSH_USER }}
-          ssh_key: ${{ secrets.SSH_KEY }}
+          ssh_host: ${{ steps.vault.outputs.ssh_host }}
+          ssh_user: ${{ steps.vault.outputs.ssh_user }}
+          ssh_key: ${{ steps.vault.outputs.ssh_key }}
+          ssh_port: ${{ steps.vault.outputs.ssh_port }}
 
       - name: Test Remote Command
         uses: mnival/ssh-remote-commands-action@main
@@ -50,3 +80,11 @@ jobs:
           ssh_host_alias: ${{ steps.ssh.outputs.ssh_host_alias }}
           ssh_commands: echo "Test Remote Command"
           ssh_args: -T
+
+      - name: Revoke token
+        # This step always runs at the end regardless of the previous steps result
+        if: always()
+        uses: ./.github/actions/revoke-token
+        with:
+          url: ${{ secrets.VAULT_URL }}
+          vault_token: ${{ env.VAULT_TOKEN }}
