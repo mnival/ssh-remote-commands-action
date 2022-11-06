@@ -13,6 +13,7 @@ runs:
   using: "composite"
   steps:
     - name: Revoke token
+      shell: bash
       run: |
         curl --fail -X POST -s -H "X-Vault-Token: ${{ env.VAULT_TOKEN }}" --write-out "%{http_code}" \
         ${{ inputs.url }}/v1/auth/token/revoke-self
