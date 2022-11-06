@@ -7,10 +7,14 @@ inputs:
     required: true
 
 outputs:
-  ssh_user: ${{ steps.vault.outputs.ssh_user }}
-  ssh_host: ${{ steps.vault.outputs.ssh_host }}
-  ssh_port: ${{ steps.vault.outputs.ssh_port }}
-  ssh_key: ${{ steps.vault.outputs.ssh_key }}
+  ssh_user:
+    value: ${{ steps.vault.outputs.ssh_user }}
+  ssh_host:
+    value: ${{ steps.vault.outputs.ssh_host }}
+  ssh_port:
+    value: ${{ steps.vault.outputs.ssh_port }}
+  ssh_key:
+    value: ${{ steps.vault.outputs.ssh_key }}
 
 runs:
   using: "composite"
