@@ -40,6 +40,14 @@ jobs:
           ssh_host_alias: ${{ steps.ssh.outputs.ssh_host_alias }}
           ssh_commands: echo "Test after init"
 
+      - name: Revoke token
+        # This step always runs at the end regardless of the previous steps result
+        if: always()
+        uses: ./.github/actions/revoke-token
+        with:
+          url: ${{ secrets.VAULT_URL }}
+          vault_token: ${{ env.VAULT_TOKEN }}
+
   check-action-after-config:
     runs-on: ubuntu-latest
     permissions:
@@ -68,3 +76,11 @@ jobs:
           ssh_host_alias: ${{ steps.ssh.outputs.ssh_host_alias }}
           ssh_commands: echo "Test Remote Command"
           ssh_args: -T
+
+      - name: Revoke token
+        # This step always runs at the end regardless of the previous steps result
+        if: always()
+        uses: ./.github/actions/revoke-token
+        with:
+          url: ${{ secrets.VAULT_URL }}
+          vault_token: ${{ env.VAULT_TOKEN }}
