@@ -11,77 +11,24 @@ on:
       - main
 
 jobs:
-  vault:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    outputs:
-      ssh_user: ${{ steps.secrets.outputs.ssh_user }}
-      ssh_host: ${{ steps.secrets.outputs.ssh_host }}
-      ssh_port: ${{ steps.secrets.outputs.ssh_port }}
-      ssh_key: ${{ steps.secrets.outputs.ssh_key }}
-    steps:
-      - name: Repository Name
-        id: repository
-        run: echo "name=${GITHUB_REPOSITORY#*/}" >> ${GITHUB_OUTPUT}
-
-      - name: Get secrets in vault
-        uses: hashicorp/vault-action@v2
-        id: vault
-        with:
-          url: ${{ secrets.VAULT_URL }}
-          role: ${{ steps.repository.outputs.name }}
-          method: jwt
-          exportToken: true
-          secrets: |
-            secrets/data/GitHub/ssh-workflow user | ssh_user ;
-            secrets/data/GitHub/ssh-workflow host | ssh_host ;
-            secrets/data/GitHub/ssh-workflow port | ssh_port ;
-            secrets/data/GitHub/ssh-workflow key | ssh_key ;
-      - name: Register Secret
-        id: secrets
-        run: |
-          echo "ssh_user=$(echo "${{ steps.vault.outputs.ssh_user }}" | gpg --symmetric --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output - | base64 -w0)" >> ${GITHUB_OUTPUT}
-          echo "ssh_host=$(echo "${{ steps.vault.outputs.ssh_host }}" | gpg --symmetric --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output - | base64 -w0)" >> ${GITHUB_OUTPUT}
-          echo "ssh_port=$(echo "${{ steps.vault.outputs.ssh_port }}" | gpg --symmetric --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output - | base64 -w0)" >> ${GITHUB_OUTPUT}
-          echo "ssh_key=$(echo "${{ steps.vault.outputs.ssh_key }}" | gpg --symmetric --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output - | base64 -w0)" >> ${GITHUB_OUTPUT}
-
   check-action-directly:
     runs-on: ubuntu-latest
-    needs: vault
     steps:
       - uses: actions/checkout@v3
 
-      - name: Decrypt secrets
-        id: secrets
-        run: |
-          ssh_user="$(echo "${{ needs.vault.outputs.ssh_user }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output -)"
-          echo "::add-mask::${ssh_user}"
-          echo "ssh_user=${ssh_user}" >> ${GITHUB_OUTPUT}
-          ssh_host="$(echo "${{ needs.vault.outputs.ssh_host }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output -)"
-          echo "::add-mask::${ssh_host}"
-          echo "ssh_host=${ssh_host}" >> ${GITHUB_OUTPUT}
-          ssh_port="$(echo "${{ needs.vault.outputs.ssh_port }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output -)"
-          echo "::add-mask::${ssh_port}"
-          echo "ssh_port=${ssh_port}" >> ${GITHUB_OUTPUT}
-          ssh_key="$(echo "${{ needs.vault.outputs.ssh_key }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.PGP_PASSPHRASE }}" --output -)"
-          while read i; do printf "::add-mask::${i}\n"; done <<< $(echo "${ssh_key}")
-          echo "${ssh_key}"
-          echo 'EOF'
-          echo 'ssh_key<<EOF' >> ${GITHUB_OUTPUT}
-          echo "${ssh_key}" >> ${GITHUB_OUTPUT}
-          echo 'EOF' >> ${GITHUB_OUTPUT}
-          echo "${ssh_key}"
+      - uses: ./.github/actions/vault
+        id: vault
+        with:
+          url: ${{ secrets.URL_VAULT }}
 
       - name: Test Remote command directly
         id: ssh
         uses: mnival/ssh-remote-commands-action@main
         with:
-          ssh_host: ${{ steps.secrets.outputs.ssh_host }}
-          ssh_user: ${{ steps.secrets.outputs.ssh_user }}
-          ssh_key: ${{ steps.secrets.outputs.ssh_key }}
-          ssh_port: ${{ steps.secrets.outputs.ssh_port }}
+          ssh_host: ${{ steps.vault.outputs.ssh_host }}
+          ssh_user: ${{ steps.vault.outputs.ssh_user }}
+          ssh_key: ${{ steps.vault.outputs.ssh_key }}
+          ssh_port: ${{ steps.vault.outputs.ssh_port }}
           ssh_commands: echo "Test Remote command directly"
 
       - name: Test after init
@@ -92,7 +39,6 @@ jobs:
 
   check-action-after-config:
     runs-on: ubuntu-latest
-    needs: vault
     steps:
       - uses: actions/checkout@v3
 
@@ -100,10 +46,10 @@ jobs:
         id: ssh
         uses: mnival/ssh-config-action@v0.0.2
         with:
-          ssh_host: ${{ needs.vault.outputs.ssh_host }}
-          ssh_user: ${{ needs.vault.outputs.ssh_user }}
-          ssh_key: ${{ needs.vault.outputs.ssh_key }}
-          ssh_port: ${{ needs.vault.outputs.ssh_port }}
+          ssh_host: ${{ steps.vault.outputs.ssh_host }}
+          ssh_user: ${{ steps.vault.outputs.ssh_user }}
+          ssh_key: ${{ steps.vault.outputs.ssh_key }}
+          ssh_port: ${{ steps.vault.outputs.ssh_port }}
 
       - name: Test Remote Command
         uses: mnival/ssh-remote-commands-action@main
